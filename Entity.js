@@ -12,6 +12,7 @@ class Entity {
     update() {
         const g = this.dna[this.time];
         this.pos.add(g.x, g.y);
+        if(Vector2.dist(this.pos, target) < 5 && succ_gen == null) succ_gen = n_gen;
         this.time++;
     }
 
@@ -22,7 +23,10 @@ class Entity {
 
     calcFitness() {
         const dist = Vector2.dist(this.pos, target);
+        if(dist < 5) return 1;
         let res =(dist*-1 + this.maxdist)/this.maxdist;
-        return res > 0 ? res : 0;
+        if(res < 0) res = 0;
+        else if (res > 1) res = 1;
+        return res*(1+res);
     }
 }

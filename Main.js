@@ -1,11 +1,11 @@
 let canvas, ctx,
 width = 400, height = 400,
-genTime = 100, time = 0,
+genTime = 50, time = 0,
 
-entities = [], ne = 10,
-target = new Vector2(350, 200)
+entities = [], ne = 60,
+target = new Vector2(200, 200)
 
-n_gen = 1;
+n_gen = 1, succ_gen = null;
 
 function start() {
     canvas = document.createElement("canvas");
@@ -55,7 +55,7 @@ function render() {
 
     ctx.fillStyle = "rgba(255, 255, 255, 1)";
     ctx.font = "20px Arial";
-    ctx.fillText("Generation: " + n_gen, 10, 20);
+    ctx.fillText("Generation: " + n_gen + " | " + succ_gen, 10, 20);
 }
 
 function genRandomGeneration(n) {
@@ -74,10 +74,10 @@ function getGenerationFromLast(last) {
     let new_gen = [];
     const prob_pool = genProbabilityPool(last);
     for(i = 0; i < last.length; i++) {
-        const e0 = prob_pool[Math.floor(Math.random()*prob_pool.length)];
-        const e1 = prob_pool[Math.floor(Math.random()*prob_pool.length)];
+        let e0 = prob_pool[Math.floor(Math.random()*prob_pool.length)];
+        let e1 = prob_pool[Math.floor(Math.random()*prob_pool.length)];
         let dna = mixDna(e0, e1);
-        dna = mutateDna(dna, 5);
+        dna = mutateDna(dna, 1);
         new_gen.push(new Entity(dna));
     }
     return new_gen;
@@ -111,6 +111,9 @@ function mutateDna(base_dna, rate) {
 }
 
 function genProbabilityPool(generation) {
+    let sorted_gen = [];
+
+    
     let res = [];
     for(ii = 0; ii < generation.length; ii++) {
         for(jj = 0; jj < Math.floor(generation[ii].calcFitness()*100); jj++) {
