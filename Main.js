@@ -1,11 +1,14 @@
 let canvas, ctx,
 width = 400, height = 400,
 genTime = 50, time = 0,
+pauseTime = 100
 
 entities = [], ne = 60,
 target = new Vector2(200, 200)
 
-n_gen = 1, succ_gen = null;
+n_gen = 1, succ_gen = null, succ_last = false, succ_cont = false,
+    
+obstacles = [];
 
 function start() {
     canvas = document.createElement("canvas");
@@ -21,6 +24,9 @@ function start() {
 
 function init() {
     entities = genRandomGeneration(ne);
+
+    obstacles.push([120, 0, 10, 210]);
+    obstacles.push([140, 230, 10, 200]);
 }
 
 function gameLoop() {
@@ -32,24 +38,37 @@ function gameLoop() {
 function update() {
     for(i = 0; i < entities.length; i++) {
         entities[i].update();
+        for (j = 0; j < obstacles.length; j++) { 
+            entities[i].checkCollision(obstacles[j]);
+        }
     }
 
     time++;
-    if(time >= genTime) {
+    if (time >= genTime) {
         entities = getGenerationFromLast(entities);
         time = 0;
         n_gen++;
+        if (!succ_cont) succ_last = false;
+        succ_cont = false;
+        ctx.fillStyle = "rgba(0, 0, 0, 1)";
+        ctx.fillRect(0, 0, width, height);
     }
 }
 
 function render() {
-    ctx.fillStyle = "rgba(0, 0, 0, 1)";
+    ctx.fillStyle = "rgba(0, 0, 0, .05)";
     ctx.fillRect(0, 0, width, height);
 
-    ctx.fillStyle = "rgba(255, 0, 0, 1)";
-    ctx.fillRect(target.x, target.y, 5, 5);
+    if(!succ_last) ctx.fillStyle = "rgba(255, 0, 0, 1)";
+    else ctx.fillStyle = "rgba(255, 0, 1)";
+    ctx.fillRect(target.x - 3, target.y - 3, 6, 6);
     
-    for(i = 0; i < entities.length; i++) {
+    for(i = 0; i < obstacles.length; i++) {
+        ctx.fillStyle = "rgba(255, 255, 0, 1)";
+        ctx.fillRect(obstacles[i][0], obstacles[i][1], obstacles[i][2], obstacles[i][3]);
+    }
+
+    for (i = 0; i < entities.length; i++) {
         entities[i].render();
     }
 
