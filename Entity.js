@@ -10,11 +10,13 @@ class Entity {
         this.time = 0;
 
         this.stop = false;
+        this.stopTime = 0;
     }
 
     update() {
+        if (this.stop) return;
         const g = this.dna[this.time];
-        if(!this.stop) this.pos.add(g.x, g.y);
+        this.pos.add(g.x, g.y);
         if (Vector2.dist(this.pos, target) < 5 && succ_gen == null) {
             succ_gen = n_gen;
             succ_last = true;

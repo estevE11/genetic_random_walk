@@ -1,14 +1,16 @@
 let canvas, ctx,
-width = 400, height = 400,
-genTime = 50, time = 0,
-pauseTime = 100
+    width = 400, height = 400,
+    genTime = 50, time = 0,
+    pauseTime = 100, inPause = false
 
-entities = [], ne = 60,
-target = new Vector2(200, 200)
+    entities = [], ne = 60,
+    target = new Vector2(130, 210)
 
-n_gen = 1, succ_gen = null, succ_last = false, succ_cont = false,
+    n_gen = 1, succ_gen = null, succ_last = false, succ_cont = false,
     
-obstacles = [];
+    obstacles = [],
+    bestPath = null    
+;
 
 function start() {
     canvas = document.createElement("canvas");
@@ -25,8 +27,9 @@ function start() {
 function init() {
     entities = genRandomGeneration(ne);
 
-    obstacles.push([120, 0, 10, 210]);
-    obstacles.push([140, 230, 10, 200]);
+    obstacles.push([50, 0, 10, 215]);
+    obstacles.push([75, 210, 10, 400]);
+    obstacles.push([100, 0, 10, 215]);
 }
 
 function gameLoop() {
@@ -45,13 +48,22 @@ function update() {
 
     time++;
     if (time >= genTime) {
-        entities = getGenerationFromLast(entities);
-        time = 0;
-        n_gen++;
-        if (!succ_cont) succ_last = false;
-        succ_cont = false;
-        ctx.fillStyle = "rgba(0, 0, 0, 1)";
-        ctx.fillRect(0, 0, width, height);
+        inPause = true;
+        calcBestPath();
+        for (i = 0; i < entities.length; i++) {
+            entities[i].stop = true;
+        }
+        if (time >= genTime + pauseTime) { 
+            inPause = false;
+            entities = getGenerationFromLast(entities);
+            time = 0;
+            n_gen++;
+            if (!succ_cont) succ_last = false;
+            succ_cont = false;
+            ctx.fillStyle = "rgba(0, 0, 0, 1)";
+            ctx.fillRect(0, 0, width, height);
+        }
+
     }
 }
 
@@ -75,6 +87,30 @@ function render() {
     ctx.fillStyle = "rgba(255, 255, 255, 1)";
     ctx.font = "20px Arial";
     ctx.fillText("Generation: " + n_gen + " | " + succ_gen, 10, 20);
+
+    if (inPause) { 
+        renderBestPath();
+    }
+}
+
+function calcBestPath() { 
+    let bestFitness = -1;
+    for (i = 0; i < entities.length; i++) {
+        let fit = entities[i].calcFitness();
+        if (fit > bestFitness) { 
+            bestFitness = fit;
+            bestPath = entities[i].dna.slice(0, entities[i].time);
+        }
+    }
+}
+
+function renderBestPath() {
+    let pos = new Vector2(20, 200);
+    for (i = 0; i < bestPath.length; i++) {
+        pos.add(bestPath[i].x, bestPath[i].y)
+        ctx.fillStyle = "rgba(255, 200, 200, .5)";
+        ctx.fillRect(pos.x, pos.y, 5, 5);
+    }
 }
 
 function genRandomGeneration(n) {
