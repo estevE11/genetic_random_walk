@@ -19,7 +19,8 @@ function initChart() {
                 y: {
                     beginAtZero: true
                 }
-            }
+            },
+            pointRadius: 0
         }
     });
 }
