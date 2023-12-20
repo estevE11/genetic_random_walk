@@ -168,12 +168,30 @@ function mutateDna(base_dna, rate) {
 }
 
 function genProbabilityPool(generation) {
+    let fitnessSorted = [];
     let res = [];
+
     for(ii = 0; ii < generation.length; ii++) {
-        for(jj = 0; jj < Math.floor(generation[ii].calcFitness()*100); jj++) {
-            res.push(generation[ii]);
+        const fit = generation[ii].calcFitness();
+        let inserted = false;
+        for(jj = 0; jj < fitnessSorted.length; jj++) {
+            if(fit > fitnessSorted[jj][1]) {
+                fitnessSorted.splice(jj, 0, [generation[ii], fit]);
+                inserted = true;
+                break;
+            }
+        }
+        if (!inserted) fitnessSorted.push([generation[ii], fit]);
+    }
+
+    for (ii = 0; ii < Math.min(20, fitnessSorted.length); ii++) {
+        const fit = fitnessSorted[ii][1];
+        for(jj = 0; jj < Math.floor(fit*100^3); jj++) {
+            res.push(fitnessSorted[ii][0]);
         }
     }
+
+    console.log(res.length);
     return res;
 }
 
