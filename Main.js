@@ -1,7 +1,7 @@
 let canvas, ctx,
     width = 400, height = 400,
     genTime = 50, time = 0,
-    pauseTime = 100, inPause = false
+    pauseTime = 0, inPause = false
 
     entities = [], ne = 60,
     target = new Vector2(130, 210)
@@ -9,10 +9,11 @@ let canvas, ctx,
     n_gen = 1, succ_gen = null, succ_last = false, succ_cont = false,
     
     obstacles = [],
-    bestPath = null    
+    bestPath = null, bestFitness = -1 
 ;
 
 function start() {
+    initChart();
     canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -48,6 +49,7 @@ function update() {
 
     time++;
     if (time >= genTime) {
+        if (!inPause) chartAddData({ generation: n_gen, fitness: Math.max(bestFitness, 0) });
         inPause = true;
         calcBestPath();
         for (i = 0; i < entities.length; i++) {
@@ -94,7 +96,7 @@ function render() {
 }
 
 function calcBestPath() { 
-    let bestFitness = -1;
+    bestFitness = -1;
     for (i = 0; i < entities.length; i++) {
         let fit = entities[i].calcFitness();
         if (fit > bestFitness) { 
@@ -166,9 +168,6 @@ function mutateDna(base_dna, rate) {
 }
 
 function genProbabilityPool(generation) {
-    let sorted_gen = [];
-
-    
     let res = [];
     for(ii = 0; ii < generation.length; ii++) {
         for(jj = 0; jj < Math.floor(generation[ii].calcFitness()*100); jj++) {
